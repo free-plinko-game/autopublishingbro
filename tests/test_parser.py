@@ -162,11 +162,17 @@ class TestParseACFExport:
 
     def test_basic_content_heading_text(self, mapping):
         bc = mapping["layouts"]["BasicContent"]
-        assert bc["fields"]["heading.text"] == "field_6104217816977"
+        # Clone prefix: layout clone field_6104227ef0b47 + heading clone field_611e64259a1e0
+        assert bc["fields"]["heading.text"] == (
+            "field_6104227ef0b47_field_611e64259a1e0_field_6104217816977"
+        )
 
     def test_basic_content_content_field(self, mapping):
         bc = mapping["layouts"]["BasicContent"]
-        assert bc["fields"]["content"] == "field_611e64259a296"
+        # Clone prefix: layout clone field_6104227ef0b47
+        assert bc["fields"]["content"] == (
+            "field_6104227ef0b47_field_611e64259a296"
+        )
 
     def test_basic_content_common_fields(self, mapping):
         bc = mapping["layouts"]["BasicContent"]

@@ -152,14 +152,14 @@ class TestTransformSection:
         result = transform_section(section, mapping)
 
         assert result["acf_fc_layout"] == "BasicContent"
-        # Nested heading fields flattened to field keys
-        assert result["field_6104217816977"] == "Welcome to Pokies"  # heading.text
-        assert result["field_6104217f16978"] == "h2"  # heading.level
-        assert result["field_611278c0063b5"] == "inherit"  # heading.alignment.desktop
-        assert result["field_611278ea063b6"] == "inherit"  # heading.alignment.mobile
-        assert result["field_611e64259a296"] == "<p>Some HTML here</p>"  # content
-        assert result["field_607dbe7d30c4e"] == ""  # section_id
-        assert result["field_604fb9aff2bef"] == "reduced-padding"  # padding_override
+        # Nested heading fields flattened to clone-prefixed field keys
+        assert result["field_6104227ef0b47_field_611e64259a1e0_field_6104217816977"] == "Welcome to Pokies"  # heading.text
+        assert result["field_6104227ef0b47_field_611e64259a1e0_field_6104217f16978"] == "h2"  # heading.level
+        assert result["field_6104227ef0b47_field_611e64259a1e0_field_611278c0063b5"] == "inherit"  # heading.alignment.desktop
+        assert result["field_6104227ef0b47_field_611e64259a1e0_field_611278ea063b6"] == "inherit"  # heading.alignment.mobile
+        assert result["field_6104227ef0b47_field_611e64259a296"] == "<p>Some HTML here</p>"  # content
+        assert result["field_6104227ef0b47_field_611e64259a124_field_607dbe7d30c4e"] == ""  # section_id
+        assert result["field_6104227ef0b47_field_611e64259a124_field_604fb9aff2bef"] == "reduced-padding"  # padding_override
 
     def test_gambling_operators_transform(self, mapping):
         section = {
@@ -173,9 +173,9 @@ class TestTransformSection:
         }
         result = transform_section(section, mapping)
 
-        assert result["field_6120037c1998c"] == '[cta_list id="123"]'  # shortcode
-        assert result["field_6120051e89b55"] == "<p>Check these out</p>"  # content_above
-        assert result["field_611278ea063b6"] == "inherit"  # heading.alignment.mobile
+        assert result["field_6127c311a1955_field_6120037c1998c"] == '[cta_list id="123"]'  # shortcode
+        assert result["field_6127c311a1955_field_6120051e89b55"] == "<p>Check these out</p>"  # content_above
+        assert result["field_6127c311a1955_field_612003651998a_field_611278ea063b6"] == "inherit"  # heading.alignment.mobile
 
     def test_section_with_repeater(self, mapping):
         section = {
@@ -188,12 +188,12 @@ class TestTransformSection:
         }
         result = transform_section(section, mapping)
 
-        # Repeater sub-field names converted to field keys
+        # Repeater sub-field names converted to clone-prefixed field keys
         assert result["accordions"] == [
-            {"field_635c161a2cd0c": "Question 1", "field_635c16282cd0d": "Answer 1"},
-            {"field_635c161a2cd0c": "Question 2", "field_635c16282cd0d": "Answer 2"},
+            {"field_635beb487caf7_field_635c161a2cd0c": "Question 1", "field_635beb487caf7_field_635c16282cd0d": "Answer 1"},
+            {"field_635beb487caf7_field_635c161a2cd0c": "Question 2", "field_635beb487caf7_field_635c16282cd0d": "Answer 2"},
         ]
-        assert result["field_6104217816977"] == "FAQ"  # heading.text
+        assert result["field_635beb487caf7_field_635be5159bd1c_field_6104217816977"] == "FAQ"  # heading.text
 
 
 class TestTransformToAcf:
@@ -220,11 +220,11 @@ class TestTransformToAcf:
 
         first = result["acf"][fc_key][0]
         assert first["acf_fc_layout"] == "BasicContent"
-        assert first["field_6104217816977"] == "Intro"  # heading.text
+        assert first["field_6104227ef0b47_field_611e64259a1e0_field_6104217816977"] == "Intro"  # heading.text
 
         second = result["acf"][fc_key][1]
         assert second["acf_fc_layout"] == "GamblingOperators"
-        assert second["field_6120037c1998c"] == '[cta_list id="456"]'  # shortcode
+        assert second["field_6127c311a1955_field_6120037c1998c"] == '[cta_list id="456"]'  # shortcode
 
     def test_skips_sections_without_layout(self, mapping):
         sections = [

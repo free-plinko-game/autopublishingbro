@@ -20,8 +20,11 @@ def resolve_clone(
 
     ACF clone fields reference either entire field groups (group_xxx) or
     individual fields (field_xxx). This function follows those references
-    recursively, flattening the result since all Page Sections clones use
-    prefix_name=0 with seamless display.
+    recursively, flattening the result.
+
+    Resolved field keys are prefixed with the clone field's key using the
+    ACF format: {clone_field_key}_{original_field_key}. For nested clones,
+    prefixes accumulate (inner clones are resolved and prefixed first).
 
     Args:
         clone_field: A field dict with type="clone".
@@ -30,7 +33,7 @@ def resolve_clone(
                  Uses frozenset so parallel branches don't interfere.
 
     Returns:
-        Flat list of resolved field dicts (non-clone).
+        Flat list of resolved field dicts (non-clone) with prefixed keys.
 
     Raises:
         ValueError: If a circular clone reference is detected.
@@ -57,7 +60,7 @@ def resolve_clone(
         else:
             logger.warning("Clone reference %r not found in index, skipping", ref)
 
-    return resolved
+    return _prefix_keys(resolved, field_key)
 
 
 def _resolve_group_ref(
@@ -90,3 +93,28 @@ def _resolve_field_ref(
         return resolve_clone(field, index, visited)
 
     return [field]
+
+
+def _prefix_keys(fields: list[dict], clone_key: str) -> list[dict]:
+    """Create copies of fields with keys prefixed by the clone field's key.
+
+    ACF clone fields store data using composite keys in the format
+    {clone_field_key}_{original_field_key}. This function applies that
+    prefix to all field keys, recursing into sub_fields for groups
+    and repeaters.
+    """
+    if not clone_key:
+        return fields
+
+    prefixed: list[dict] = []
+    for field in fields:
+        new_field = dict(field)  # shallow copy
+        if "key" in new_field:
+            new_field["key"] = f"{clone_key}_{new_field['key']}"
+        # Recursively prefix sub_fields (groups, repeaters)
+        if isinstance(new_field.get("sub_fields"), list):
+            new_field["sub_fields"] = _prefix_keys(
+                new_field["sub_fields"], clone_key
+            )
+        prefixed.append(new_field)
+    return prefixed
