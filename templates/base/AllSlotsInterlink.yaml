@@ -1,0 +1,38 @@
+layout: AllSlotsInterlink
+description: Grid of slot game cards filtered by taxonomy. Auto-populates from WordPress data.
+
+fields:
+  heading:
+    text:
+      type: text
+      description: Section heading above the slots grid
+      llm_generate: true
+    level:
+      type: select
+      options: [h1, h2, h3, h4, h5, h6]
+      default: h2
+
+  intro_text:
+    type: wysiwyg
+    description: Optional intro text above the grid
+    default: ""
+
+  order:
+    type: select
+    description: Sort order for the slots
+    default: ""
+
+  load_amount:
+    type: number
+    description: Number of slots to load initially
+    default: ""
+
+  slot_card_style:
+    type: select
+    description: Visual style for the slot cards
+    default: ""
+
+  show_filters:
+    type: boolean
+    description: Whether to show filter controls
+    default: ""

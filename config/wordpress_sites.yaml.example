@@ -1,0 +1,13 @@
+sites:
+  sunvegascasino:
+    base_url: "https://www.sunvegascasino.com/wp"
+    username: "content-api"
+    application_password: "xxxx xxxx xxxx xxxx xxxx xxxx"
+    default_author_id: 5
+    default_status: "draft"
+
+  # Add more sites as needed:
+  # anothersite:
+  #   base_url: "https://another-site.com"
+  #   username: "api-user"
+  #   application_password: "xxxx xxxx xxxx xxxx xxxx xxxx"

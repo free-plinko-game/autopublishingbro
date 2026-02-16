@@ -1,0 +1,41 @@
+layout: GamblingOperators
+description: Casino operator comparison table with optional content above and below.
+
+fields:
+  heading:
+    text:
+      type: text
+      description: Section heading for the operators table
+      llm_generate: true
+    level:
+      type: select
+      options: [h1, h2, h3, h4, h5, h6]
+      default: h2
+
+  shortcode:
+    type: text
+    description: WordPress shortcode for the CTA list (e.g. [cta_list id="123"])
+    required: true
+
+  table_appearance:
+    type: select
+    description: Visual style of the operators table
+    default: ""
+
+  content_above:
+    type: wysiwyg
+    description: Content displayed above the operators table
+    llm_generate: true
+    llm_instruction: |
+      Write a brief intro (2-3 sentences) for the casino comparison table.
+      Mention why these casinos are recommended for this category.
+
+  content_below:
+    type: wysiwyg
+    description: Content displayed below the operators table
+    default: ""
+
+  call_to_action:
+    type: link
+    description: Optional CTA link below the table
+    default: ""

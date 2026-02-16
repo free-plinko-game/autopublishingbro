@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto Publishing Bro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .tab-active { border-bottom-width: 2px; border-color: #3b82f6; color: #3b82f6; font-weight: 600; }
+        .spinner { display: inline-block; width: 1rem; height: 1rem; border: 2px solid #e5e7eb; border-top-color: #3b82f6; border-radius: 50%; animation: spin 0.6s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen text-gray-800">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+            <h1 class="text-xl font-bold text-gray-900">Auto Publishing Bro</h1>
+            <span class="text-xs text-gray-400">Content Automation System</span>
+        </div>
+    </header>
+
+    <!-- Tabs -->
+    <nav class="max-w-5xl mx-auto px-6 mt-4 flex space-x-8 border-b">
+        <button onclick="showTab('generator')" id="tab-generator" class="pb-3 text-sm tab-active">Content Generator</button>
+        <button onclick="showTab('settings')" id="tab-settings" class="pb-3 text-sm text-gray-500 hover:text-gray-700">Settings</button>
+    </nav>
+
+    <!-- ==================== CONTENT GENERATOR TAB ==================== -->
+    <main id="panel-generator" class="max-w-5xl mx-auto px-6 py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+            <!-- Left: Form -->
+            <div class="space-y-5">
+                <!-- Template -->
+                <div>
+                    <label class="block text-sm font-medium mb-1">Template</label>
+                    <select id="template-select" onchange="onTemplateChange()" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">-- Select a template --</option>
+                    </select>
+                </div>
+
+                <!-- Dynamic variables -->
+                <div id="variables-container"></div>
+
+                <!-- Row: Post Type + Status -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Post Type</label>
+                        <select id="post-type" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                            <option value="post">Post</option>
+                            <option value="page">Page</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Status</label>
+                        <select id="status-select" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                            <option value="draft">Draft</option>
+                            <option value="publish">Publish</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Site -->
+                <div>
+                    <label class="block text-sm font-medium mb-1">WordPress Site</label>
+                    <select id="site-select" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                        <option value="">-- Select a site --</option>
+                    </select>
+                </div>
+
+                <!-- Buttons -->
+                <div class="flex space-x-3 pt-2">
+                    <button onclick="doPreview()" id="btn-preview" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-medium transition">
+                        Preview
+                    </button>
+                    <button onclick="doPublish()" id="btn-publish" class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg text-sm font-medium transition">
+                        Publish
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right: Results -->
+            <div>
+                <div id="result-area" class="bg-white border border-gray-200 rounded-lg p-5 min-h-[400px] overflow-auto">
+                    <p class="text-gray-400 text-sm">Select a template and click Preview to see generated content.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ==================== SETTINGS TAB ==================== -->
+    <main id="panel-settings" class="max-w-5xl mx-auto px-6 py-6 hidden">
+
+        <!-- OpenAI Key -->
+        <section class="bg-white rounded-lg border border-gray-200 p-5 mb-6">
+            <h2 class="font-semibold text-base mb-3">OpenAI API Key</h2>
+            <div class="flex items-center space-x-3">
+                <input id="openai-key" type="password" placeholder="sk-..." class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"/>
+                <button onclick="saveOpenAIKey()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition">Save</button>
+            </div>
+            <p id="openai-status" class="text-sm text-gray-500 mt-2"></p>
+        </section>
+
+        <!-- WordPress Sites -->
+        <section class="bg-white rounded-lg border border-gray-200 p-5">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="font-semibold text-base">WordPress Sites</h2>
+                <button onclick="showSiteForm()" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition">+ Add Site</button>
+            </div>
+
+            <!-- Site Form (hidden) -->
+            <div id="site-form" class="hidden border border-gray-200 rounded-lg p-4 mb-4 bg-gray-50">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <input id="sf-name" placeholder="Site name (key)" class="border border-gray-300 rounded-lg px-3 py-2 text-sm"/>
+                    <input id="sf-url" placeholder="Base URL (e.g. https://site.com/wp)" class="border border-gray-300 rounded-lg px-3 py-2 text-sm"/>
+                    <input id="sf-user" placeholder="Username" class="border border-gray-300 rounded-lg px-3 py-2 text-sm"/>
+                    <input id="sf-pass" type="password" placeholder="Application password" class="border border-gray-300 rounded-lg px-3 py-2 text-sm"/>
+                    <input id="sf-author" placeholder="Default author ID (optional)" class="border border-gray-300 rounded-lg px-3 py-2 text-sm"/>
+                    <select id="sf-status" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                        <option value="draft">draft</option>
+                        <option value="publish">publish</option>
+                        <option value="pending">pending</option>
+                    </select>
+                </div>
+                <div class="flex space-x-3 mt-3">
+                    <button onclick="saveSite()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition">Save Site</button>
+                    <button onclick="hideSiteForm()" class="border border-gray-300 hover:bg-gray-100 px-4 py-2 rounded-lg text-sm transition">Cancel</button>
+                </div>
+            </div>
+
+            <!-- Sites List -->
+            <div id="sites-list">
+                <p class="text-sm text-gray-400">Loading sites...</p>
+            </div>
+        </section>
+    </main>
+
+    <script>
+    // ============================================================
+    // State
+    // ============================================================
+    let templates = [];
+    let editingSite = null;
+
+    // ============================================================
+    // Init
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', () => {
+        loadTemplates();
+        loadSitesDropdown();
+        loadSettings();
+    });
+
+    // ============================================================
+    // API helper
+    // ============================================================
+    async function api(method, url, body) {
+        const opts = { method, headers: { 'Content-Type': 'application/json' } };
+        if (body) opts.body = JSON.stringify(body);
+        const resp = await fetch(url, opts);
+        const data = await resp.json();
+        return { ok: resp.ok, status: resp.status, data };
+    }
+
+    // ============================================================
+    // Tab switching
+    // ============================================================
+    function showTab(name) {
+        document.getElementById('panel-generator').classList.toggle('hidden', name !== 'generator');
+        document.getElementById('panel-settings').classList.toggle('hidden', name !== 'settings');
+        document.getElementById('tab-generator').classList.toggle('tab-active', name === 'generator');
+        document.getElementById('tab-generator').classList.toggle('text-gray-500', name !== 'generator');
+        document.getElementById('tab-settings').classList.toggle('tab-active', name === 'settings');
+        document.getElementById('tab-settings').classList.toggle('text-gray-500', name !== 'settings');
+        if (name === 'settings') loadSettings();
+    }
+
+    // ============================================================
+    // Content Generator
+    // ============================================================
+    async function loadTemplates() {
+        const { ok, data } = await api('GET', '/api/templates');
+        if (!ok) return;
+        templates = data;
+        const sel = document.getElementById('template-select');
+        sel.innerHTML = '<option value="">-- Select a template --</option>';
+        templates.forEach(t => {
+            const opt = document.createElement('option');
+            opt.value = t.name;
+            opt.textContent = t.display_name || t.name;
+            sel.appendChild(opt);
+        });
+    }
+
+    async function loadSitesDropdown() {
+        const { ok, data } = await api('GET', '/api/sites');
+        if (!ok) return;
+        const sel = document.getElementById('site-select');
+        sel.innerHTML = '<option value="">-- Select a site --</option>';
+        (data.sites || []).forEach(name => {
+            const opt = document.createElement('option');
+            opt.value = name;
+            opt.textContent = name;
+            sel.appendChild(opt);
+        });
+    }
+
+    function onTemplateChange() {
+        const name = document.getElementById('template-select').value;
+        const container = document.getElementById('variables-container');
+        container.innerHTML = '';
+
+        const tpl = templates.find(t => t.name === name);
+        if (!tpl || !tpl.variables || tpl.variables.length === 0) return;
+
+        const heading = document.createElement('p');
+        heading.className = 'text-sm font-medium text-gray-700 mb-2';
+        heading.textContent = 'Template Variables';
+        container.appendChild(heading);
+
+        tpl.variables.forEach(varName => {
+            const div = document.createElement('div');
+            div.className = 'mb-3';
+
+            const label = document.createElement('label');
+            label.className = 'block text-sm text-gray-600 mb-1';
+            label.textContent = varName.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.id = 'var-' + varName;
+            input.placeholder = varName;
+            input.className = 'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500';
+
+            div.appendChild(label);
+            div.appendChild(input);
+            container.appendChild(div);
+        });
+    }
+
+    function gatherVariables() {
+        const vars = {};
+        const tplName = document.getElementById('template-select').value;
+        const tpl = templates.find(t => t.name === tplName);
+        if (!tpl || !tpl.variables) return vars;
+        tpl.variables.forEach(v => {
+            const el = document.getElementById('var-' + v);
+            if (el && el.value.trim()) vars[v] = el.value.trim();
+        });
+        return vars;
+    }
+
+    function setLoading(btnId, loading) {
+        const btn = document.getElementById(btnId);
+        if (loading) {
+            btn.dataset.origText = btn.textContent;
+            btn.innerHTML = '<span class="spinner"></span> Working...';
+            btn.disabled = true;
+            btn.classList.add('opacity-70');
+        } else {
+            btn.textContent = btn.dataset.origText || btn.textContent;
+            btn.disabled = false;
+            btn.classList.remove('opacity-70');
+        }
+    }
+
+    async function doPreview() {
+        const template = document.getElementById('template-select').value;
+        if (!template) return showResult('Please select a template.', true);
+
+        setLoading('btn-preview', true);
+        const { ok, data } = await api('POST', '/api/preview', {
+            template,
+            variables: gatherVariables(),
+        });
+        setLoading('btn-preview', false);
+
+        if (!ok) return showResult(data.error || 'Preview failed.', true);
+        renderPreview(data);
+    }
+
+    async function doPublish() {
+        const template = document.getElementById('template-select').value;
+        const site = document.getElementById('site-select').value;
+        if (!template) return showResult('Please select a template.', true);
+        if (!site) return showResult('Please select a WordPress site.', true);
+
+        setLoading('btn-publish', true);
+        const { ok, data } = await api('POST', '/api/publish', {
+            template,
+            site,
+            variables: gatherVariables(),
+            post_type: document.getElementById('post-type').value,
+            status: document.getElementById('status-select').value,
+        });
+        setLoading('btn-publish', false);
+
+        if (!ok) return showResult(data.error || 'Publish failed.', true);
+
+        const area = document.getElementById('result-area');
+        area.innerHTML = `
+            <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                <h3 class="text-green-800 font-semibold mb-2">Published Successfully!</h3>
+                <p class="text-sm text-green-700 mb-1"><strong>Post ID:</strong> ${data.post_id}</p>
+                <p class="text-sm text-green-700 mb-1"><strong>Status:</strong> ${data.status}</p>
+                <p class="text-sm text-green-700 mb-1"><strong>Site:</strong> ${data.site}</p>
+                ${data.link ? `<a href="${data.link}" target="_blank" class="text-blue-600 hover:underline text-sm mt-2 inline-block">View Post &rarr;</a>` : ''}
+            </div>
+        `;
+    }
+
+    function renderPreview(data) {
+        const area = document.getElementById('result-area');
+        if (!data.sections || data.sections.length === 0) {
+            area.innerHTML = '<p class="text-gray-400 text-sm">No sections generated.</p>';
+            return;
+        }
+
+        let html = '';
+
+        // Warnings
+        if (data.warnings && data.warnings.length > 0) {
+            html += '<div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4 text-sm text-yellow-800">';
+            html += '<strong>Warnings:</strong><ul class="list-disc ml-4 mt-1">';
+            data.warnings.forEach(w => html += `<li>${esc(w)}</li>`);
+            html += '</ul></div>';
+        }
+
+        data.sections.forEach((section, i) => {
+            html += `<div class="border border-gray-200 rounded-lg p-4 mb-3">`;
+            html += `<div class="flex justify-between items-center mb-2">`;
+            html += `<h3 class="font-semibold text-sm text-blue-700">${esc(section.acf_fc_layout)}</h3>`;
+            html += `<span class="text-xs text-gray-400">Section ${i + 1}</span>`;
+            html += `</div>`;
+
+            const fields = section.fields || section;
+            renderFields(fields, '').forEach(line => html += line);
+
+            html += `</div>`;
+        });
+
+        area.innerHTML = html;
+    }
+
+    function renderFields(obj, prefix) {
+        const lines = [];
+        for (const [key, val] of Object.entries(obj)) {
+            if (key === 'acf_fc_layout') continue;
+            const label = prefix ? `${prefix}.${key}` : key;
+            if (val && typeof val === 'object' && !Array.isArray(val)) {
+                lines.push(...renderFields(val, label));
+            } else if (typeof val === 'string' && val.includes('<')) {
+                lines.push(`<div class="mb-2"><span class="text-xs text-gray-500 font-mono">${esc(label)}</span><div class="mt-1 text-sm prose prose-sm max-w-none">${val}</div></div>`);
+            } else if (val !== null && val !== undefined) {
+                lines.push(`<div class="mb-2"><span class="text-xs text-gray-500 font-mono">${esc(label)}</span><p class="text-sm mt-0.5">${esc(String(val))}</p></div>`);
+            }
+        }
+        return lines;
+    }
+
+    function showResult(msg, isError) {
+        const area = document.getElementById('result-area');
+        const cls = isError ? 'text-red-600 bg-red-50 border-red-200' : 'text-gray-600';
+        area.innerHTML = `<div class="p-3 rounded-lg border ${cls} text-sm">${esc(msg)}</div>`;
+    }
+
+    function esc(s) {
+        const d = document.createElement('div');
+        d.textContent = s;
+        return d.innerHTML;
+    }
+
+    // ============================================================
+    // Settings
+    // ============================================================
+    async function loadSettings() {
+        const { ok, data } = await api('GET', '/api/settings');
+        if (!ok) return;
+
+        // OpenAI status
+        const status = document.getElementById('openai-status');
+        if (data.openai.api_key_set) {
+            status.innerHTML = `<span class="text-green-600">Key set:</span> <code class="text-xs">${esc(data.openai.api_key_masked)}</code>`;
+        } else {
+            status.innerHTML = '<span class="text-red-500">No API key set</span>';
+        }
+
+        // Sites list
+        renderSitesList(data.sites);
+    }
+
+    async function saveOpenAIKey() {
+        const key = document.getElementById('openai-key').value.trim();
+        if (!key) return alert('Please enter an API key.');
+
+        const { ok, data } = await api('POST', '/api/settings/openai', { api_key: key });
+        if (ok) {
+            document.getElementById('openai-key').value = '';
+            loadSettings();
+        } else {
+            alert(data.error || 'Failed to save key.');
+        }
+    }
+
+    function renderSitesList(sites) {
+        const container = document.getElementById('sites-list');
+        const names = Object.keys(sites);
+        if (names.length === 0) {
+            container.innerHTML = '<p class="text-sm text-gray-400">No sites configured. Click "Add Site" to get started.</p>';
+            return;
+        }
+
+        let html = '<div class="divide-y divide-gray-100">';
+        names.forEach(name => {
+            const s = sites[name];
+            html += `
+            <div class="py-3 flex items-center justify-between" id="site-row-${esc(name)}">
+                <div class="flex-1 min-w-0">
+                    <p class="font-medium text-sm">${esc(name)}</p>
+                    <p class="text-xs text-gray-500 truncate">${esc(s.base_url)} &middot; ${esc(s.username)} &middot; <span class="font-mono">${esc(s.application_password)}</span></p>
+                </div>
+                <div class="flex space-x-2 ml-4 flex-shrink-0">
+                    <button onclick="testSite('${esc(name)}')" class="text-xs border border-gray-300 hover:bg-gray-100 px-2.5 py-1 rounded-md transition">Test</button>
+                    <button onclick="editSite('${esc(name)}')" class="text-xs border border-gray-300 hover:bg-gray-100 px-2.5 py-1 rounded-md transition">Edit</button>
+                    <button onclick="deleteSite('${esc(name)}')" class="text-xs border border-red-300 text-red-600 hover:bg-red-50 px-2.5 py-1 rounded-md transition">Delete</button>
+                </div>
+            </div>`;
+        });
+        html += '</div>';
+        container.innerHTML = html;
+    }
+
+    function showSiteForm(prefill) {
+        editingSite = prefill ? prefill.name : null;
+        document.getElementById('sf-name').value = prefill ? prefill.name : '';
+        document.getElementById('sf-name').disabled = !!prefill;
+        document.getElementById('sf-url').value = prefill ? prefill.base_url : '';
+        document.getElementById('sf-user').value = prefill ? prefill.username : '';
+        document.getElementById('sf-pass').value = '';
+        document.getElementById('sf-author').value = prefill && prefill.default_author_id ? prefill.default_author_id : '';
+        document.getElementById('sf-status').value = prefill ? prefill.default_status : 'draft';
+        document.getElementById('site-form').classList.remove('hidden');
+    }
+
+    function hideSiteForm() {
+        document.getElementById('site-form').classList.add('hidden');
+        editingSite = null;
+    }
+
+    async function editSite(name) {
+        const { ok, data } = await api('GET', '/api/settings');
+        if (!ok || !data.sites[name]) return;
+        showSiteForm({ name, ...data.sites[name] });
+    }
+
+    async function saveSite() {
+        const name = editingSite || document.getElementById('sf-name').value.trim();
+        const password = document.getElementById('sf-pass').value.trim();
+
+        if (!name) return alert('Site name is required.');
+
+        const body = {
+            name,
+            base_url: document.getElementById('sf-url').value.trim(),
+            username: document.getElementById('sf-user').value.trim(),
+            default_status: document.getElementById('sf-status').value,
+        };
+
+        if (password) body.application_password = password;
+
+        const authorId = document.getElementById('sf-author').value.trim();
+        if (authorId) body.default_author_id = parseInt(authorId, 10);
+
+        // For new sites, password is required
+        if (!editingSite && !password) return alert('Application password is required for new sites.');
+
+        const { ok, data } = await api('POST', '/api/settings/sites', body);
+        if (ok) {
+            hideSiteForm();
+            loadSettings();
+            loadSitesDropdown();
+        } else {
+            alert(data.error || 'Failed to save site.');
+        }
+    }
+
+    async function deleteSite(name) {
+        if (!confirm(`Delete site "${name}"? This cannot be undone.`)) return;
+        const { ok, data } = await api('DELETE', `/api/settings/sites/${encodeURIComponent(name)}`);
+        if (ok) {
+            loadSettings();
+            loadSitesDropdown();
+        } else {
+            alert(data.error || 'Failed to delete site.');
+        }
+    }
+
+    async function testSite(name) {
+        const row = document.getElementById('site-row-' + name);
+        if (!row) return;
+
+        // Show loading state
+        const testBtn = row.querySelector('button');
+        const origText = testBtn.textContent;
+        testBtn.innerHTML = '<span class="spinner"></span>';
+        testBtn.disabled = true;
+
+        const { ok, data } = await api('POST', `/api/settings/sites/${encodeURIComponent(name)}/test`);
+
+        testBtn.textContent = origText;
+        testBtn.disabled = false;
+
+        // Show result inline
+        let existing = row.querySelector('.test-result');
+        if (existing) existing.remove();
+
+        const badge = document.createElement('span');
+        badge.className = 'test-result text-xs ml-2 px-2 py-0.5 rounded-full';
+        if (data.ok) {
+            badge.className += ' bg-green-100 text-green-700';
+            badge.textContent = 'Connected as ' + (data.user || 'unknown');
+        } else {
+            badge.className += ' bg-red-100 text-red-700';
+            badge.textContent = data.error || 'Connection failed';
+        }
+
+        row.querySelector('div').appendChild(badge);
+        setTimeout(() => badge.remove(), 8000);
+    }
+    </script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+name: Pokies Category Page
+description: Template for pokies category pages (e.g. "Single-Reel Pokies", "Megaways Pokies")
+slug_pattern: "online-pokies/{category_slug}/"
+post_type: post
+
+variables:
+  category_name:
+    description: "Display name, e.g. 'Single-Reel Pokies'"
+    required: true
+  category_slug:
+    description: "URL slug, e.g. 'single-reel-pokies'"
+    required: true
+  target_keywords:
+    description: "Comma-separated SEO keywords to target"
+    required: true
+  cta_list_id:
+    description: "ID for the casino CTA list shortcode"
+    required: true
+
+sections:
+  # --- Section 1: Introduction ---
+  - layout: BasicContent
+    purpose: Introduction to the pokies category
+    llm_context: |
+      Write an engaging introduction to {category_name}.
+      This is the first thing players see on the page.
+      Target keywords: {target_keywords}
+      Tone: Informative but exciting, welcoming.
+      Length: 200-300 words.
+    fields:
+      heading:
+        text: "{category_name}"
+        level: h1
+      content: "{{LLM_GENERATE}}"
+
+  # --- Section 2: Casino Operators Table ---
+  - layout: GamblingOperators
+    purpose: Casino recommendations for this category
+    llm_context: |
+      Write a brief intro (2-3 sentences) for the casino comparison table.
+      Mention why these casinos are great for playing {category_name}.
+      Be specific about features relevant to this pokie type.
+    fields:
+      heading:
+        text: "Best Online Casinos for {category_name}"
+        level: h2
+      shortcode: '[cta_list id="{cta_list_id}"]'
+      content_above: "{{LLM_GENERATE}}"
+      content_below: ""
+
+  # --- Section 3: What Are X? ---
+  - layout: BasicContent
+    purpose: Educational explanation of this pokies type
+    llm_context: |
+      Explain what {category_name} are in detail.
+      Cover: how they work, key features, what makes them unique.
+      Be educational but not boring. Use bullet points where helpful.
+      Target keywords: {target_keywords}
+      Length: 250-400 words.
+    fields:
+      heading:
+        text: "What Are {category_name}?"
+        level: h2
+      content: "{{LLM_GENERATE}}"
+
+  # --- Section 4: Related Slots Grid ---
+  - layout: AllSlotsInterlink
+    purpose: Grid of related slot games in this category
+    fields:
+      heading:
+        text: "Find Your Perfect {category_name} Game Below"
+        level: h2
+
+  # --- Section 5: Why Choose X? ---
+  - layout: BasicContent
+    purpose: Compelling reasons to play this type of pokie
+    llm_context: |
+      Explain the benefits and appeal of {category_name}.
+      Include 3-5 compelling reasons why players enjoy them.
+      Use bullet points or a numbered list.
+      Be persuasive but honest.
+      Length: 200-300 words.
+    fields:
+      heading:
+        text: "Why Choose {category_name}?"
+        level: h2
+      content: "{{LLM_GENERATE}}"
+
+  # --- Section 6: Conclusion ---
+  - layout: BasicContent
+    purpose: Closing summary with soft call-to-action
+    llm_context: |
+      Write a brief conclusion (100-150 words) wrapping up the page.
+      Summarise the key points about {category_name}.
+      Include a soft CTA encouraging players to explore the games above.
+      Do NOT use a heading for this section.
+    fields:
+      heading:
+        text: ""
+        level: h2
+      content: "{{LLM_GENERATE}}"

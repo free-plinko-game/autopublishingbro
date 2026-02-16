@@ -1,0 +1,34 @@
+layout: AccordionSection
+description: Expandable accordion with heading, optional intro text, and repeatable Q&A items.
+
+fields:
+  heading:
+    text:
+      type: text
+      description: Section heading above the accordion
+      llm_generate: true
+    level:
+      type: select
+      options: [h1, h2, h3, h4, h5, h6]
+      default: h2
+
+  wysiwyg:
+    type: wysiwyg
+    description: Optional intro content above the accordion items
+    default: ""
+
+  accordions:
+    type: repeater
+    description: List of accordion items (expand/collapse)
+    llm_generate: true
+    llm_instruction: |
+      Generate 5-8 FAQ-style accordion items.
+      Each item needs a concise question as the title
+      and a helpful 2-4 sentence answer as the content.
+    sub_fields:
+      title:
+        type: text
+        description: Accordion item heading (the question)
+      content:
+        type: textarea
+        description: Accordion item body (the answer)

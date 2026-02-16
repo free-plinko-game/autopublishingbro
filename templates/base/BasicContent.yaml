@@ -1,0 +1,25 @@
+layout: BasicContent
+description: A content section with heading and WYSIWYG body. The workhorse layout for text-heavy sections.
+
+fields:
+  heading:
+    text:
+      type: text
+      description: The section heading text
+      llm_generate: true
+      llm_instruction: Write a compelling, SEO-friendly heading
+    level:
+      type: select
+      options: [h1, h2, h3, h4, h5, h6]
+      default: h2
+      description: Heading hierarchy level
+      llm_instruction: Use h1 only for the main page title, h2 for major sections
+
+  content:
+    type: wysiwyg
+    description: Main content body (HTML)
+    llm_generate: true
+    llm_instruction: |
+      Write engaging, informative content using semantic HTML.
+      Use <p> for paragraphs, <ul>/<li> for lists, <strong> for emphasis.
+      Keep paragraphs short (3-4 sentences). Target 150-300 words.
