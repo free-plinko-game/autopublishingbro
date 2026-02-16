@@ -1,7 +1,7 @@
 """Transform human-readable content to ACF REST API format.
 
 Takes section dicts written by humans/LLMs using friendly field names
-and produces the nested structure WordPress ACF Pro REST API expects.
+and produces the flat field-key structure WordPress ACF Pro REST API expects.
 """
 
 from __future__ import annotations
@@ -28,7 +28,8 @@ def transform_to_acf(
 
     Returns:
         Dict ready to send as the request body, structured as:
-        {"acf": {"page_sections": [...]}}
+        {"acf": {"<flexible_content_key>": [...]}}
+        where field names are replaced with ACF field keys.
     """
     transformed_sections = []
 
@@ -49,7 +50,7 @@ def transform_to_acf(
 
     return {
         "acf": {
-            "page_sections": transformed_sections,
+            mapping.flexible_content_key: transformed_sections,
         },
     }
 
@@ -58,20 +59,18 @@ def transform_section(
     section: dict[str, Any],
     mapping: FieldMapping,
 ) -> dict[str, Any]:
-    """Transform a single section with defaults applied.
+    """Transform a single section with defaults applied and field keys resolved.
 
     Args:
         section: Human-readable section dict with acf_fc_layout.
         mapping: Loaded FieldMapping.
 
     Returns:
-        Section dict with defaults filled in and acf_fc_layout preserved.
+        Section dict with defaults filled in, field names replaced with
+        ACF field keys, and nested dicts flattened.
     """
     layout_name = section["acf_fc_layout"]
     layout_fields = mapping.get_layout_fields(layout_name)
-
-    # Start with the layout identifier
-    result: dict[str, Any] = {"acf_fc_layout": layout_name}
 
     # Apply defaults, then merge user-provided values on top
     section_without_layout = {
@@ -79,9 +78,79 @@ def transform_section(
     }
     merged = apply_defaults(section_without_layout, layout_fields)
 
-    # Expand the merged content into the result
-    result.update(merged)
+    # Convert field names to ACF field keys
+    result: dict[str, Any] = {"acf_fc_layout": layout_name}
+    result.update(_convert_to_field_keys(merged, layout_fields))
 
+    return result
+
+
+def _convert_to_field_keys(
+    data: dict[str, Any],
+    fields_mapping: dict[str, Any],
+) -> dict[str, Any]:
+    """Convert human-readable field names to ACF field keys.
+
+    Handles:
+    - Simple fields: section_id → field_607dbe7d30c4e
+    - Nested dicts: heading.text → field_6104217816977 (flattened)
+    - Repeaters: accordions[] sub-field names → field keys
+    """
+    result: dict[str, Any] = {}
+
+    for key, value in data.items():
+        if isinstance(value, list):
+            # Check for repeater sub-mapping (key[])
+            repeater_key = f"{key}[]"
+            if repeater_key in fields_mapping and isinstance(
+                fields_mapping[repeater_key], dict
+            ):
+                sub_mapping = fields_mapping[repeater_key]
+                result[key] = [
+                    _convert_to_field_keys(item, sub_mapping)
+                    if isinstance(item, dict)
+                    else item
+                    for item in value
+                ]
+            elif key in fields_mapping and isinstance(
+                fields_mapping[key], str
+            ):
+                result[fields_mapping[key]] = value
+            else:
+                result[key] = value
+        elif isinstance(value, dict):
+            # Flatten nested dict and look up dot-notation paths
+            flat = _flatten_to_dot_paths(value, key)
+            for dot_path, val in flat.items():
+                if dot_path in fields_mapping and isinstance(
+                    fields_mapping[dot_path], str
+                ):
+                    result[fields_mapping[dot_path]] = val
+                else:
+                    result[dot_path] = val
+        else:
+            # Simple scalar field
+            if key in fields_mapping and isinstance(
+                fields_mapping[key], str
+            ):
+                result[fields_mapping[key]] = value
+            else:
+                result[key] = value
+
+    return result
+
+
+def _flatten_to_dot_paths(
+    data: dict[str, Any], prefix: str = ""
+) -> dict[str, Any]:
+    """Flatten a nested dict to dot-notation paths with leaf values."""
+    result: dict[str, Any] = {}
+    for key, value in data.items():
+        full_key = f"{prefix}.{key}" if prefix else key
+        if isinstance(value, dict):
+            result.update(_flatten_to_dot_paths(value, full_key))
+        else:
+            result[full_key] = value
     return result
 
 

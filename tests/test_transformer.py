@@ -152,12 +152,14 @@ class TestTransformSection:
         result = transform_section(section, mapping)
 
         assert result["acf_fc_layout"] == "BasicContent"
-        assert result["heading"]["text"] == "Welcome to Pokies"
-        assert result["heading"]["level"] == "h2"
-        assert result["heading"]["alignment"]["desktop"] == "inherit"
-        assert result["content"] == "<p>Some HTML here</p>"
-        assert result["section_id"] == ""
-        assert result["padding_override"] == "reduced-padding"
+        # Nested heading fields flattened to field keys
+        assert result["field_6104217816977"] == "Welcome to Pokies"  # heading.text
+        assert result["field_6104217f16978"] == "h2"  # heading.level
+        assert result["field_611278c0063b5"] == "inherit"  # heading.alignment.desktop
+        assert result["field_611278ea063b6"] == "inherit"  # heading.alignment.mobile
+        assert result["field_611e64259a296"] == "<p>Some HTML here</p>"  # content
+        assert result["field_607dbe7d30c4e"] == ""  # section_id
+        assert result["field_604fb9aff2bef"] == "reduced-padding"  # padding_override
 
     def test_gambling_operators_transform(self, mapping):
         section = {
@@ -171,9 +173,9 @@ class TestTransformSection:
         }
         result = transform_section(section, mapping)
 
-        assert result["shortcode"] == '[cta_list id="123"]'
-        assert result["content_above"] == "<p>Check these out</p>"
-        assert result["heading"]["alignment"]["mobile"] == "inherit"
+        assert result["field_6120037c1998c"] == '[cta_list id="123"]'  # shortcode
+        assert result["field_6120051e89b55"] == "<p>Check these out</p>"  # content_above
+        assert result["field_611278ea063b6"] == "inherit"  # heading.alignment.mobile
 
     def test_section_with_repeater(self, mapping):
         section = {
@@ -186,11 +188,12 @@ class TestTransformSection:
         }
         result = transform_section(section, mapping)
 
+        # Repeater sub-field names converted to field keys
         assert result["accordions"] == [
-            {"title": "Question 1", "content": "Answer 1"},
-            {"title": "Question 2", "content": "Answer 2"},
+            {"field_635c161a2cd0c": "Question 1", "field_635c16282cd0d": "Answer 1"},
+            {"field_635c161a2cd0c": "Question 2", "field_635c16282cd0d": "Answer 2"},
         ]
-        assert result["heading"]["text"] == "FAQ"
+        assert result["field_6104217816977"] == "FAQ"  # heading.text
 
 
 class TestTransformToAcf:
@@ -210,17 +213,18 @@ class TestTransformToAcf:
         ]
         result = transform_to_acf(sections, mapping)
 
+        fc_key = mapping.flexible_content_key
         assert "acf" in result
-        assert "page_sections" in result["acf"]
-        assert len(result["acf"]["page_sections"]) == 2
+        assert fc_key in result["acf"]
+        assert len(result["acf"][fc_key]) == 2
 
-        first = result["acf"]["page_sections"][0]
+        first = result["acf"][fc_key][0]
         assert first["acf_fc_layout"] == "BasicContent"
-        assert first["heading"]["text"] == "Intro"
+        assert first["field_6104217816977"] == "Intro"  # heading.text
 
-        second = result["acf"]["page_sections"][1]
+        second = result["acf"][fc_key][1]
         assert second["acf_fc_layout"] == "GamblingOperators"
-        assert second["shortcode"] == '[cta_list id="456"]'
+        assert second["field_6120037c1998c"] == '[cta_list id="456"]'  # shortcode
 
     def test_skips_sections_without_layout(self, mapping):
         sections = [
@@ -228,7 +232,8 @@ class TestTransformToAcf:
             {"acf_fc_layout": "BasicContent", "content": "<p>Valid</p>"},
         ]
         result = transform_to_acf(sections, mapping)
-        assert len(result["acf"]["page_sections"]) == 1
+        fc_key = mapping.flexible_content_key
+        assert len(result["acf"][fc_key]) == 1
 
     def test_skips_unknown_layouts(self, mapping):
         sections = [
@@ -236,11 +241,13 @@ class TestTransformToAcf:
             {"acf_fc_layout": "BasicContent", "content": "<p>Real</p>"},
         ]
         result = transform_to_acf(sections, mapping)
-        assert len(result["acf"]["page_sections"]) == 1
+        fc_key = mapping.flexible_content_key
+        assert len(result["acf"][fc_key]) == 1
 
     def test_empty_sections_list(self, mapping):
         result = transform_to_acf([], mapping)
-        assert result["acf"]["page_sections"] == []
+        fc_key = mapping.flexible_content_key
+        assert result["acf"][fc_key] == []
 
 
 # --- Validation tests ---
