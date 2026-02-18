@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import functools
 import hmac
+import json
 import logging
 import os
 from pathlib import Path
@@ -315,6 +316,12 @@ def transform():
 
     # Normalize AirOps flat format -> transformer nested format
     normalized_sections = _normalize_airops_sections(raw_sections)
+    logger.debug(
+        "Normalized %d sections for site %s: %s",
+        len(normalized_sections),
+        site_name,
+        json.dumps(normalized_sections, default=str)[:2000],
+    )
 
     # Validate sections against mapping
     warnings = validate_sections(normalized_sections, mapping)

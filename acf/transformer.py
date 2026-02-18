@@ -106,12 +106,23 @@ def _convert_to_field_keys(
                 fields_mapping[repeater_key], dict
             ):
                 sub_mapping = fields_mapping[repeater_key]
-                result[key] = [
-                    _convert_to_field_keys(item, sub_mapping)
-                    if isinstance(item, dict)
-                    else item
-                    for item in value
-                ]
+                converted_items = []
+                for item in value:
+                    if isinstance(item, dict):
+                        converted_items.append(
+                            _convert_to_field_keys(item, sub_mapping)
+                        )
+                    elif len(sub_mapping) == 1:
+                        # Auto-wrap: primitive value into the single sub-field.
+                        sub_field_name = next(iter(sub_mapping))
+                        converted_items.append(
+                            _convert_to_field_keys(
+                                {sub_field_name: item}, sub_mapping
+                            )
+                        )
+                    else:
+                        converted_items.append(item)
+                result[key] = converted_items
             elif key in fields_mapping and isinstance(
                 fields_mapping[key], str
             ):

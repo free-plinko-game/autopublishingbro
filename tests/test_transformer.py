@@ -196,6 +196,70 @@ class TestTransformSection:
         assert result["field_635beb487caf7_field_635be5159bd1c_field_6104217816977"] == "FAQ"  # heading.text
 
 
+class TestRepeaterAutoWrap:
+    """Test auto-wrapping of primitive values in single-sub-field repeaters."""
+
+    def test_pros_string_array_wrapped(self, mapping):
+        """Pros sent as string array should be auto-wrapped into dicts."""
+        section = {
+            "acf_fc_layout": "ProsAndCons",
+            "heading": {"text": "Pros & Cons", "level": "h2"},
+            "pros": ["Large bonuses", "Crypto support", "Fast signup"],
+            "cons": ["Slow withdrawals", "Limited games"],
+        }
+        result = transform_section(section, mapping)
+
+        pros_key = "field_62f1420eb73c9_field_62f140f16e2f6"
+        cons_key = "field_62f1420eb73c9_field_62f141366e2f8"
+
+        assert len(result["pros"]) == 3
+        assert result["pros"][0] == {pros_key: "Large bonuses"}
+        assert result["pros"][1] == {pros_key: "Crypto support"}
+        assert result["pros"][2] == {pros_key: "Fast signup"}
+
+        assert len(result["cons"]) == 2
+        assert result["cons"][0] == {cons_key: "Slow withdrawals"}
+        assert result["cons"][1] == {cons_key: "Limited games"}
+
+    def test_pros_dict_array_still_works(self, mapping):
+        """Pros sent as dict array (correct format) should still work."""
+        section = {
+            "acf_fc_layout": "ProsAndCons",
+            "heading": {"text": "Pros", "level": "h2"},
+            "pros": [{"pro": "Large bonuses"}, {"pro": "Crypto support"}],
+            "cons": [],
+        }
+        result = transform_section(section, mapping)
+
+        pros_key = "field_62f1420eb73c9_field_62f140f16e2f6"
+        assert result["pros"][0] == {pros_key: "Large bonuses"}
+        assert result["pros"][1] == {pros_key: "Crypto support"}
+
+    def test_multi_field_repeater_string_passthrough(self, mapping):
+        """Multi-field repeater receiving string items should NOT auto-wrap."""
+        section = {
+            "acf_fc_layout": "AccordionSection",
+            "heading": {"text": "FAQ", "level": "h2"},
+            "accordions": ["This is wrong data"],
+        }
+        result = transform_section(section, mapping)
+
+        # String passes through unchanged since sub_mapping has 2 fields
+        assert result["accordions"] == ["This is wrong data"]
+
+    def test_empty_repeater_array(self, mapping):
+        """Empty arrays should work fine."""
+        section = {
+            "acf_fc_layout": "ProsAndCons",
+            "heading": {"text": "None", "level": "h2"},
+            "pros": [],
+            "cons": [],
+        }
+        result = transform_section(section, mapping)
+        assert result["pros"] == []
+        assert result["cons"] == []
+
+
 class TestTransformToAcf:
     def test_full_payload_structure(self, mapping):
         sections = [
