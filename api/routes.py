@@ -251,6 +251,14 @@ def publish():
     if slug:
         post_data["slug"] = slug
 
+    # Yoast SEO meta fields
+    meta_title = body.get("meta_title")
+    meta_description = body.get("meta_description")
+    if meta_title:
+        post_data["yoast_wpseo_title"] = meta_title
+    if meta_description:
+        post_data["yoast_wpseo_metadesc"] = meta_description
+
     # Publish to WordPress
     try:
         wp_client = WordPressClient(site_config)
@@ -344,6 +352,14 @@ def transform():
     # Slug: from variables
     if variables.get("category_slug"):
         payload["slug"] = variables["category_slug"]
+
+    # Yoast SEO meta fields (pass through to WordPress payload)
+    meta_title = body.get("meta_title")
+    meta_description = body.get("meta_description")
+    if meta_title:
+        payload["yoast_wpseo_title"] = meta_title
+    if meta_description:
+        payload["yoast_wpseo_metadesc"] = meta_description
 
     return jsonify({
         "success": True,

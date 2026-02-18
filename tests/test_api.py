@@ -423,6 +423,53 @@ class TestPublish:
         assert post_data["title"] == "Custom Title"
         assert post_data["slug"] == "custom-slug"
 
+    @patch("api.routes.WordPressClient")
+    @patch("api.routes.generate_page_content")
+    @patch("api.routes.transform_to_acf")
+    @patch("api.routes.render_page_template")
+    @patch("api.routes._get_llm_client")
+    @patch("api.routes._get_mapping")
+    @patch("api.routes.load_page_template")
+    @patch("api.routes.load_site_config")
+    def test_publish_with_yoast_fields(
+        self,
+        mock_site,
+        mock_load_template,
+        mock_mapping,
+        mock_get_llm,
+        mock_render,
+        mock_transform,
+        mock_generate,
+        mock_wp_class,
+        client,
+        site_config,
+        mapping,
+    ):
+        mock_site.return_value = site_config
+        mock_load_template.return_value = {"name": "test", "sections": []}
+        mock_mapping.return_value = mapping
+        mock_get_llm.return_value = MagicMock()
+        mock_render.return_value = []
+        mock_generate.return_value = []
+        mock_transform.return_value = {"acf": {"page_sections": []}}
+
+        mock_wp = MagicMock()
+        mock_wp.create_post.return_value = {"id": 1, "link": "", "status": "draft"}
+        mock_wp_class.return_value = mock_wp
+
+        resp = client.post("/api/publish", json={
+            "site": "testsite",
+            "template": "test",
+            "meta_title": "SEO Title",
+            "meta_description": "SEO description text",
+        })
+
+        assert resp.status_code == 201
+        call_args = mock_wp.create_post.call_args
+        post_data = call_args[0][0]
+        assert post_data["yoast_wpseo_title"] == "SEO Title"
+        assert post_data["yoast_wpseo_metadesc"] == "SEO description text"
+
     @patch("api.routes.generate_page_content")
     @patch("api.routes.render_page_template")
     @patch("api.routes._get_llm_client")
@@ -683,6 +730,45 @@ class TestTransform:
         data = resp.get_json()
         assert data["success"] is True
         assert data["payload"]["acf"]["page_sections"] == []
+
+    # --- Yoast SEO ---
+
+    @patch("api.routes._get_mapping_for_site")
+    def test_transform_yoast_fields_included(self, mock_mapping, client, mapping):
+        """meta_title and meta_description should appear as Yoast fields in payload."""
+        mock_mapping.return_value = mapping
+
+        resp = client.post(
+            "/api/transform",
+            json={
+                "site": "sunvegascasino",
+                "meta_title": "Tether Casinos Australia 2025",
+                "meta_description": "Compare the best tether casinos...",
+                "sections": [],
+            },
+            headers=self._HEADERS,
+        )
+
+        assert resp.status_code == 200
+        payload = resp.get_json()["payload"]
+        assert payload["yoast_wpseo_title"] == "Tether Casinos Australia 2025"
+        assert payload["yoast_wpseo_metadesc"] == "Compare the best tether casinos..."
+
+    @patch("api.routes._get_mapping_for_site")
+    def test_transform_yoast_fields_omitted_when_absent(self, mock_mapping, client, mapping):
+        """Yoast fields should not appear in payload when not provided."""
+        mock_mapping.return_value = mapping
+
+        resp = client.post(
+            "/api/transform",
+            json={"site": "sunvegascasino", "sections": []},
+            headers=self._HEADERS,
+        )
+
+        assert resp.status_code == 200
+        payload = resp.get_json()["payload"]
+        assert "yoast_wpseo_title" not in payload
+        assert "yoast_wpseo_metadesc" not in payload
 
     # --- Errors ---
 
