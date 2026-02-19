@@ -1,6 +1,7 @@
 """Settings API — manage WordPress sites and OpenAI configuration."""
 
 from __future__ import annotations
+import hmac
 
 import logging
 import os
@@ -20,6 +21,16 @@ from wordpress.client import WordPressClient
 logger = logging.getLogger(__name__)
 
 settings_bp = Blueprint("settings", __name__, url_prefix="/api/settings")
+
+
+@settings_bp.before_request
+def check_settings_auth():
+    api_key = os.environ.get("TRANSFORM_API_KEY")
+    if not api_key:
+        return jsonify({"error": "Auth not configured"}), 500
+    provided = request.headers.get("X-API-Key", "")
+    if not hmac.compare_digest(provided, api_key):
+        return jsonify({"error": "Unauthorized"}), 401
 
 _ENV_PATH = Path(__file__).parent.parent / ".env"
 

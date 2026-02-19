@@ -97,8 +97,8 @@ def get_sites():
 
 # --- Preview ---
 
-
 @api_bp.route("/preview", methods=["POST"])
+@require_api_key
 def preview():
     """Generate content from a template WITHOUT publishing.
 
@@ -167,8 +167,8 @@ def preview():
 
 # --- Publish ---
 
-
 @api_bp.route("/publish", methods=["POST"])
+@require_api_key
 def publish():
     """Generate content and publish to WordPress.
 
