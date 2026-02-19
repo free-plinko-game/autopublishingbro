@@ -1,11 +1,8 @@
 """Flask application entry point."""
-
 from __future__ import annotations
-
 import os
-
 from dotenv import load_dotenv
-from flask import Flask, send_from_directory
+from flask import Flask, jsonify
 
 load_dotenv()
 
@@ -39,7 +36,7 @@ def create_app(config: dict | None = None) -> Flask:
 
     @app.route("/")
     def index():
-        return send_from_directory(app.static_folder, "index.html")
+        return jsonify({"error": "UI disabled. Use API endpoints only."}), 403
 
     return app
 
