@@ -82,6 +82,27 @@ class TestLoader:
         with pytest.raises(FileNotFoundError):
             load_page_template("nonexistent_template")
 
+    @pytest.mark.parametrize("bad_name", [
+        "../../etc/passwd",
+        "../secrets",
+        "foo/bar",
+        "template.yaml",
+        "hello world",
+        "",
+    ])
+    def test_path_traversal_rejected(self, bad_name):
+        with pytest.raises(ValueError, match="Invalid template name"):
+            load_page_template(bad_name)
+
+    def test_valid_template_names_accepted(self):
+        """Sanity check that the regex allows legit names."""
+        # These should not raise ValueError (may raise FileNotFoundError)
+        for name in ["pokies_category", "my-template", "Template01"]:
+            try:
+                load_page_template(name)
+            except FileNotFoundError:
+                pass  # expected for non-existent but validly-named templates
+
     def test_load_missing_base_raises(self):
         with pytest.raises(FileNotFoundError):
             load_base_template("NonexistentLayout")

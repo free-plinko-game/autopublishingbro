@@ -785,6 +785,58 @@ class TestTransform:
         assert resp.status_code == 500
         assert "mapping" in resp.get_json()["error"].lower()
 
+    # --- Path traversal ---
+
+    @pytest.mark.parametrize("bad_site", [
+        "../../etc/passwd",
+        "../secrets",
+        "foo/bar",
+        "site.json",
+        "hello world",
+    ])
+    def test_transform_path_traversal_rejected(self, bad_site, client):
+        resp = client.post(
+            "/api/transform",
+            json={"site": bad_site, "sections": []},
+            headers=self._HEADERS,
+        )
+        assert resp.status_code == 500
+        assert "Invalid site name" in resp.get_json()["error"]
+
+
+# --- Path Traversal (unit) ---
+
+
+class TestGetMappingForSiteValidation:
+    @pytest.mark.parametrize("bad_name", [
+        "../../etc/passwd",
+        "../secrets",
+        "foo/bar",
+        "site.json",
+        "hello world",
+        "",
+    ])
+    def test_rejects_traversal_names(self, bad_name, app):
+        from api.routes import _get_mapping_for_site
+
+        with app.app_context():
+            with pytest.raises(ValueError, match="Invalid site name"):
+                _get_mapping_for_site(bad_name)
+
+    def test_accepts_valid_names(self, app):
+        from api.routes import _get_mapping_for_site
+
+        with app.app_context():
+            # Valid names should not raise ValueError (may raise other errors)
+            for name in ["sunvegascasino", "my-site", "site_01"]:
+                try:
+                    _get_mapping_for_site(name)
+                except ValueError as e:
+                    if "Invalid site name" in str(e):
+                        pytest.fail(f"Valid name {name!r} was rejected")
+                except (FileNotFoundError, Exception):
+                    pass  # expected — mapping file may not exist
+
 
 # --- Normalize AirOps Sections ---
 

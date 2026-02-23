@@ -7,6 +7,7 @@ import hmac
 import json
 import logging
 import os
+import re
 from pathlib import Path
 from typing import Any
 
@@ -405,6 +406,9 @@ def _get_mapping_for_site(site_name: str) -> FieldMapping:
     Looks for config/field_mappings/{site_name}.json first.
     Falls back to the default mapping path from app config.
     """
+    if not re.match(r"^[a-zA-Z0-9_-]+$", site_name):
+        raise ValueError("Invalid site name")
+
     from flask import current_app
     site_path = Path(f"config/field_mappings/{site_name}.json")
     if site_path.exists():

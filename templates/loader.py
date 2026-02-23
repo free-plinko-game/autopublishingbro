@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import re
 from pathlib import Path
 from typing import Any
 
@@ -66,8 +67,15 @@ def load_page_template(template_name: str, pages_dir: Path | None = None) -> dic
         FileNotFoundError: If the template file doesn't exist.
         ValueError: If the template is missing required keys.
     """
+    if not re.match(r"^[a-zA-Z0-9_-]+$", template_name):
+        raise ValueError("Invalid template name")
+
     directory = pages_dir or PAGES_DIR
     filepath = directory / f"{template_name}.yaml"
+
+    resolved = filepath.resolve()
+    if not str(resolved).startswith(str(directory.resolve())):
+        raise ValueError("Invalid template path")
 
     if not filepath.exists():
         raise FileNotFoundError(f"Page template not found: {filepath}")
