@@ -70,8 +70,10 @@ def site_config():
 
 
 class TestHealth:
+    _HEADERS = {"X-API-Key": "test-api-key"}
+
     def test_health(self, client):
-        resp = client.get("/api/health")
+        resp = client.get("/api/health", headers=self._HEADERS)
         assert resp.status_code == 200
         data = resp.get_json()
         assert data["status"] == "ok"
@@ -82,12 +84,14 @@ class TestHealth:
 
 
 class TestTemplates:
+    _HEADERS = {"X-API-Key": "test-api-key"}
+
     @patch("api.routes.list_page_templates")
     def test_list_templates(self, mock_list, client):
         mock_list.return_value = [
             {"name": "pokies_category", "description": "Category page"}
         ]
-        resp = client.get("/api/templates")
+        resp = client.get("/api/templates", headers=self._HEADERS)
         assert resp.status_code == 200
         data = resp.get_json()
         assert len(data) == 1
@@ -98,10 +102,12 @@ class TestTemplates:
 
 
 class TestSites:
+    _HEADERS = {"X-API-Key": "test-api-key"}
+
     @patch("api.routes.list_sites")
     def test_list_sites(self, mock_list, client):
         mock_list.return_value = ["sunvegascasino", "othersite"]
-        resp = client.get("/api/sites")
+        resp = client.get("/api/sites", headers=self._HEADERS)
         assert resp.status_code == 200
         data = resp.get_json()
         assert data["sites"] == ["sunvegascasino", "othersite"]
@@ -111,20 +117,22 @@ class TestSites:
 
 
 class TestPreview:
+    _HEADERS = {"X-API-Key": "test-api-key"}
+
     def test_missing_json_body(self, client):
-        resp = client.post("/api/preview", data="not json", content_type="text/plain")
+        resp = client.post("/api/preview", data="not json", content_type="text/plain", headers=self._HEADERS)
         assert resp.status_code == 400
         assert "JSON" in resp.get_json()["error"]
 
     def test_missing_template_field(self, client):
-        resp = client.post("/api/preview", json={"variables": {}})
+        resp = client.post("/api/preview", json={"variables": {}}, headers=self._HEADERS)
         assert resp.status_code == 400
         assert "template" in resp.get_json()["error"]
 
     @patch("api.routes.load_page_template")
     def test_template_not_found(self, mock_load, client):
         mock_load.side_effect = FileNotFoundError("not found")
-        resp = client.post("/api/preview", json={"template": "nonexistent"})
+        resp = client.post("/api/preview", json={"template": "nonexistent"}, headers=self._HEADERS)
         assert resp.status_code == 404
         assert "not found" in resp.get_json()["error"]
 
@@ -167,7 +175,7 @@ class TestPreview:
         resp = client.post("/api/preview", json={
             "template": "test",
             "variables": {"category_name": "Pokies"},
-        })
+        }, headers=self._HEADERS)
 
         assert resp.status_code == 200
         data = resp.get_json()
@@ -189,7 +197,7 @@ class TestPreview:
         mock_validate.return_value = []
         mock_render.side_effect = ValueError("Missing required variable: category_name")
 
-        resp = client.post("/api/preview", json={"template": "test"})
+        resp = client.post("/api/preview", json={"template": "test"}, headers=self._HEADERS)
         assert resp.status_code == 400
         assert "category_name" in resp.get_json()["error"]
 
@@ -217,7 +225,7 @@ class TestPreview:
         mock_render.return_value = [{"acf_fc_layout": "BasicContent", "fields": {}}]
         mock_generate.side_effect = LLMError("API timeout")
 
-        resp = client.post("/api/preview", json={"template": "test"})
+        resp = client.post("/api/preview", json={"template": "test"}, headers=self._HEADERS)
         assert resp.status_code == 502
         assert "LLM" in resp.get_json()["error"]
 
@@ -227,7 +235,7 @@ class TestPreview:
         mock_load.return_value = {"name": "test", "sections": []}
         mock_mapping.side_effect = Exception("File not found")
 
-        resp = client.post("/api/preview", json={"template": "test"})
+        resp = client.post("/api/preview", json={"template": "test"}, headers=self._HEADERS)
         assert resp.status_code == 500
         assert "mapping" in resp.get_json()["error"].lower()
 
@@ -236,17 +244,19 @@ class TestPreview:
 
 
 class TestPublish:
+    _HEADERS = {"X-API-Key": "test-api-key"}
+
     def test_missing_json_body(self, client):
-        resp = client.post("/api/publish", data="nope", content_type="text/plain")
+        resp = client.post("/api/publish", data="nope", content_type="text/plain", headers=self._HEADERS)
         assert resp.status_code == 400
 
     def test_missing_required_fields(self, client):
-        resp = client.post("/api/publish", json={"template": "test"})
+        resp = client.post("/api/publish", json={"template": "test"}, headers=self._HEADERS)
         assert resp.status_code == 400
         assert "site" in resp.get_json()["error"]
 
     def test_missing_template(self, client):
-        resp = client.post("/api/publish", json={"site": "testsite"})
+        resp = client.post("/api/publish", json={"site": "testsite"}, headers=self._HEADERS)
         assert resp.status_code == 400
         assert "template" in resp.get_json()["error"]
 
@@ -255,7 +265,7 @@ class TestPublish:
         mock_load_site.side_effect = ValueError("Site 'bad' not found")
         resp = client.post("/api/publish", json={
             "site": "bad", "template": "test",
-        })
+        }, headers=self._HEADERS)
         assert resp.status_code == 400
         assert "Site config" in resp.get_json()["error"]
 
@@ -267,7 +277,7 @@ class TestPublish:
 
         resp = client.post("/api/publish", json={
             "site": "testsite", "template": "nonexistent",
-        })
+        }, headers=self._HEADERS)
         assert resp.status_code == 404
 
     @patch("api.routes.WordPressClient")
@@ -319,7 +329,7 @@ class TestPublish:
             "site": "testsite",
             "template": "test",
             "variables": {"category_name": "Pokies"},
-        })
+        }, headers=self._HEADERS)
 
         assert resp.status_code == 201
         data = resp.get_json()
@@ -371,7 +381,7 @@ class TestPublish:
 
         resp = client.post("/api/publish", json={
             "site": "testsite", "template": "test",
-        })
+        }, headers=self._HEADERS)
         assert resp.status_code == 502
         assert "WordPress" in resp.get_json()["error"]
 
@@ -415,7 +425,7 @@ class TestPublish:
             "title": "Custom Title",
             "slug": "custom-slug",
             "status": "publish",
-        })
+        }, headers=self._HEADERS)
 
         assert resp.status_code == 201
         call_args = mock_wp.create_post.call_args
@@ -462,7 +472,7 @@ class TestPublish:
             "template": "test",
             "meta_title": "SEO Title",
             "meta_description": "SEO description text",
-        })
+        }, headers=self._HEADERS)
 
         assert resp.status_code == 201
         call_args = mock_wp.create_post.call_args
@@ -497,7 +507,7 @@ class TestPublish:
 
         resp = client.post("/api/publish", json={
             "site": "testsite", "template": "test",
-        })
+        }, headers=self._HEADERS)
         assert resp.status_code == 502
         assert "LLM" in resp.get_json()["error"]
 

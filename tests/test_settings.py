@@ -14,7 +14,8 @@ from wordpress.auth import SiteConfig
 
 
 @pytest.fixture
-def app():
+def app(monkeypatch):
+    monkeypatch.setenv("TRANSFORM_API_KEY", "test-api-key")
     return create_app({"TESTING": True})
 
 
@@ -64,6 +65,8 @@ class TestMask:
 
 
 class TestGetSettings:
+    _HEADERS = {"X-API-Key": "test-api-key"}
+
     @patch("api.settings.load_site_config")
     @patch("api.settings.list_sites")
     def test_returns_masked_data(self, mock_list, mock_load, client, site_config, monkeypatch):
@@ -71,7 +74,7 @@ class TestGetSettings:
         mock_list.return_value = ["testsite"]
         mock_load.return_value = site_config
 
-        resp = client.get("/api/settings")
+        resp = client.get("/api/settings", headers=self._HEADERS)
         assert resp.status_code == 200
         data = resp.get_json()
 
@@ -89,7 +92,7 @@ class TestGetSettings:
         monkeypatch.delenv("OPENAI_API_KEY", raising=False)
         mock_list.return_value = []
 
-        resp = client.get("/api/settings")
+        resp = client.get("/api/settings", headers=self._HEADERS)
         data = resp.get_json()
         assert data["sites"] == {}
         assert data["openai"]["api_key_set"] is False
@@ -102,7 +105,7 @@ class TestGetSettings:
             SiteConfig(name="good", base_url="x", username="u", application_password="pass1234"),
             ValueError("bad config"),
         ]
-        resp = client.get("/api/settings")
+        resp = client.get("/api/settings", headers=self._HEADERS)
         data = resp.get_json()
         assert "good" in data["sites"]
         assert "broken" not in data["sites"]
@@ -112,6 +115,8 @@ class TestGetSettings:
 
 
 class TestUpsertSite:
+    _HEADERS = {"X-API-Key": "test-api-key"}
+
     @patch("api.settings.save_site_config")
     def test_add_site(self, mock_save, client):
         resp = client.post("/api/settings/sites", json={
@@ -119,19 +124,19 @@ class TestUpsertSite:
             "base_url": "https://new.com/wp",
             "username": "admin",
             "application_password": "pass word",
-        })
+        }, headers=self._HEADERS)
         assert resp.status_code == 200
         assert resp.get_json()["success"] is True
         mock_save.assert_called_once()
 
     def test_missing_body(self, client):
-        resp = client.post("/api/settings/sites", data="nope", content_type="text/plain")
+        resp = client.post("/api/settings/sites", data="nope", content_type="text/plain", headers=self._HEADERS)
         assert resp.status_code == 400
 
     def test_missing_name(self, client):
         resp = client.post("/api/settings/sites", json={
             "base_url": "x", "username": "u", "application_password": "p",
-        })
+        }, headers=self._HEADERS)
         assert resp.status_code == 400
         assert "name" in resp.get_json()["error"]
 
@@ -140,7 +145,7 @@ class TestUpsertSite:
         mock_save.side_effect = ValueError("Missing required fields: application_password")
         resp = client.post("/api/settings/sites", json={
             "name": "bad", "base_url": "x",
-        })
+        }, headers=self._HEADERS)
         assert resp.status_code == 400
 
 
@@ -148,17 +153,19 @@ class TestUpsertSite:
 
 
 class TestDeleteSite:
+    _HEADERS = {"X-API-Key": "test-api-key"}
+
     @patch("api.settings.delete_site_config")
     def test_delete_existing(self, mock_delete, client):
         mock_delete.return_value = True
-        resp = client.delete("/api/settings/sites/mysite")
+        resp = client.delete("/api/settings/sites/mysite", headers=self._HEADERS)
         assert resp.status_code == 200
         assert resp.get_json()["success"] is True
 
     @patch("api.settings.delete_site_config")
     def test_delete_missing(self, mock_delete, client):
         mock_delete.return_value = False
-        resp = client.delete("/api/settings/sites/nope")
+        resp = client.delete("/api/settings/sites/nope", headers=self._HEADERS)
         assert resp.status_code == 404
 
 
@@ -166,6 +173,8 @@ class TestDeleteSite:
 
 
 class TestTestSite:
+    _HEADERS = {"X-API-Key": "test-api-key"}
+
     @patch("api.settings.WordPressClient")
     @patch("api.settings.load_site_config")
     def test_success(self, mock_load, mock_wp_class, client, site_config):
@@ -174,7 +183,7 @@ class TestTestSite:
         mock_wp.test_connection.return_value = {"ok": True, "user": "Admin", "user_id": 1}
         mock_wp_class.return_value = mock_wp
 
-        resp = client.post("/api/settings/sites/testsite/test")
+        resp = client.post("/api/settings/sites/testsite/test", headers=self._HEADERS)
         assert resp.status_code == 200
         assert resp.get_json()["ok"] is True
 
@@ -186,14 +195,14 @@ class TestTestSite:
         mock_wp.test_connection.return_value = {"ok": False, "error": "Unauthorized", "status_code": 401}
         mock_wp_class.return_value = mock_wp
 
-        resp = client.post("/api/settings/sites/testsite/test")
+        resp = client.post("/api/settings/sites/testsite/test", headers=self._HEADERS)
         assert resp.status_code == 502
         assert resp.get_json()["ok"] is False
 
     @patch("api.settings.load_site_config")
     def test_bad_site(self, mock_load, client):
         mock_load.side_effect = ValueError("Site not found")
-        resp = client.post("/api/settings/sites/bad/test")
+        resp = client.post("/api/settings/sites/bad/test", headers=self._HEADERS)
         assert resp.status_code == 400
 
 
@@ -201,9 +210,11 @@ class TestTestSite:
 
 
 class TestUpdateOpenAIKey:
+    _HEADERS = {"X-API-Key": "test-api-key"}
+
     @patch("api.settings.set_key")
     def test_update_key(self, mock_set_key, client, monkeypatch):
-        resp = client.post("/api/settings/openai", json={"api_key": "sk-newkey12345678"})
+        resp = client.post("/api/settings/openai", json={"api_key": "sk-newkey12345678"}, headers=self._HEADERS)
         assert resp.status_code == 200
         data = resp.get_json()
         assert data["success"] is True
@@ -211,11 +222,11 @@ class TestUpdateOpenAIKey:
         mock_set_key.assert_called_once()
 
     def test_missing_body(self, client):
-        resp = client.post("/api/settings/openai", data="nope", content_type="text/plain")
+        resp = client.post("/api/settings/openai", data="nope", content_type="text/plain", headers=self._HEADERS)
         assert resp.status_code == 400
 
     def test_missing_key(self, client):
-        resp = client.post("/api/settings/openai", json={})
+        resp = client.post("/api/settings/openai", json={}, headers=self._HEADERS)
         assert resp.status_code == 400
         assert "api_key" in resp.get_json()["error"]
 

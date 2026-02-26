@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import re
+from urllib.parse import urlparse
+
 
 # Tags allowed in WordPress WYSIWYG content
 ALLOWED_TAGS = frozenset({
@@ -20,6 +22,8 @@ ALLOWED_ATTRS: dict[str, frozenset[str]] = {
     "a": frozenset({"href", "title", "target", "rel"}),
     "img": frozenset({"src", "alt", "width", "height"}),
 }
+
+_SAFE_SCHEMES = frozenset({"", "http", "https", "mailto"})
 
 # Pattern to match HTML tags (opening, closing, self-closing)
 _TAG_PATTERN = re.compile(
@@ -98,7 +102,7 @@ def _filter_tag(match: re.Match) -> str:
 
     # Filter attributes
     allowed = ALLOWED_ATTRS.get(tag_name, frozenset())
-    filtered_attrs = _filter_attributes(attrs_str, allowed)
+    filtered_attrs = filter_attributes(attrs_str, allowed)
 
     if filtered_attrs:
         return f"<{tag_name} {filtered_attrs}>"
@@ -115,6 +119,13 @@ def _filter_attributes(attrs_str: str, allowed: frozenset[str]) -> str:
         attr_name = match.group(1).lower()
         attr_value = match.group(2) if match.group(2) is not None else match.group(3)
         if attr_name in allowed:
+            if attr_name in ("href", "src"):
+                try:
+                    parsed = urlparse(attr_value)
+                    if parsed.scheme.lower() not in _SAFE_SCHEMES:
+                        continue
+                except Exception:
+                    continue
             parts.append(f'{attr_name}="{attr_value}"')
 
     return " ".join(parts)
