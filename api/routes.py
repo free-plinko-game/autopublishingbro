@@ -71,6 +71,7 @@ def _get_llm_client() -> LLMClient:
 
 
 @api_bp.route("/health", methods=["GET"])
+@require_api_key
 def health():
     """Health check endpoint."""
     return jsonify({"status": "ok", "service": "auto-publishing-bro"})
@@ -78,18 +79,17 @@ def health():
 
 # --- Templates ---
 
-
 @api_bp.route("/templates", methods=["GET"])
+@require_api_key
 def get_templates():
-    """List all available page templates."""
-    templates = list_page_templates()
-    return jsonify(templates)
+	"""List all available page templates."""
+	templates = list_page_templates()    
+	return jsonify(templates)
 
 
 # --- Sites ---
-
-
 @api_bp.route("/sites", methods=["GET"])
+@require_api_key
 def get_sites():
     """List all configured WordPress sites."""
     sites = list_sites()
