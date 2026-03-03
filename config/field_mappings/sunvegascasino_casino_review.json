@@ -1,0 +1,154 @@
+{
+  "flexible_content_key": "field_61042266f0b46",
+  "layouts": {
+    "ProsAndCons": {
+      "layout_key": "layout_62f141f7b73c7",
+      "fields": {
+        "section_id": "field_62f1420eb73c9_field_62f65a1c03db8_field_607dbe7d30c4e",
+        "padding_override": "field_62f1420eb73c9_field_62f65a1c03db8_field_604fb9aff2bef",
+        "section_width": "field_62f1420eb73c9_field_62f65a1c03db8_field_604fba7af2bf1",
+        "toc_exclude": "field_62f1420eb73c9_field_62f65a1c03db8_field_66d80de7822c1",
+        "background_color": "field_62f1420eb73c9_field_62f65a1c03db8_field_604f9d21affbd",
+        "background_image": "field_62f1420eb73c9_field_62f65a1c03db8_field_611be7713d1aa",
+        "heading.text": "field_62f1420eb73c9_field_62f65a1c03db8_field_6104217816977",
+        "heading.level": "field_62f1420eb73c9_field_62f65a1c03db8_field_6104217f16978",
+        "heading.alignment.desktop": "field_62f1420eb73c9_field_62f65a1c03db8_field_611278c0063b5",
+        "heading.alignment.mobile": "field_62f1420eb73c9_field_62f65a1c03db8_field_611278ea063b6",
+        "content": "field_62f1420eb73c9_field_62f140836e2f4",
+        "layout.sub_heading_level": "field_62f1420eb73c9_field_668cedc0f4798",
+        "layout.layout_used": "field_62f1420eb73c9_field_66d349604a405",
+        "pros[]": {
+          "pro": "field_62f1420eb73c9_field_62f140f16e2f6"
+        },
+        "cons[]": {
+          "con": "field_62f1420eb73c9_field_62f141366e2f8"
+        },
+        "pros_background_override": "field_62f1420eb73c9_field_62fce9407db68",
+        "cons_background_override": "field_62f1420eb73c9_field_62fce9b07db69",
+        "combo_box[]": {
+          "box_title": "field_62f1420eb73c9_field_66d4d703146c8",
+          "rows[]": {
+            "pro_con_combo_icon": "field_62f1420eb73c9_field_66d43f08d7d38",
+            "text": "field_62f1420eb73c9_field_66d37d0f9285b"
+          },
+          "background_override": "field_62f1420eb73c9_field_66d37d409285e"
+        }
+      }
+    },
+    "MediaCarousel": {
+      "layout_key": "layout_64de4aea6942d",
+      "fields": {
+        "section_id": "field_64de4b016942e_field_64de4a379853e_field_607dbe7d30c4e",
+        "padding_override": "field_64de4b016942e_field_64de4a379853e_field_604fb9aff2bef",
+        "section_width": "field_64de4b016942e_field_64de4a379853e_field_604fba7af2bf1",
+        "toc_exclude": "field_64de4b016942e_field_64de4a379853e_field_66d80de7822c1",
+        "background_color": "field_64de4b016942e_field_64de4a379853e_field_604f9d21affbd",
+        "background_image": "field_64de4b016942e_field_64de4a379853e_field_611be7713d1aa",
+        "heading.text": "field_64de4b016942e_field_64de4a379853e_field_6104217816977",
+        "heading.level": "field_64de4b016942e_field_64de4a379853e_field_6104217f16978",
+        "heading.alignment.desktop": "field_64de4b016942e_field_64de4a379853e_field_611278c0063b5",
+        "heading.alignment.mobile": "field_64de4b016942e_field_64de4a379853e_field_611278ea063b6",
+        "description_above": "field_64de4b016942e_field_64de4a3c9853f",
+        "media[]": {
+          "image": "field_64de4b016942e_field_64de4a7d98542",
+          "link": "field_64de4b016942e_field_64de4a8698543"
+        },
+        "description_below": "field_64de4b016942e_field_64de4a4998540"
+      }
+    },
+    "ExpandableCards": {
+      "layout_key": "layout_63207c6dd5c1a",
+      "fields": {
+        "section_id": "field_63207c75d5c1b_field_630d15dc01820_field_607dbe7d30c4e",
+        "padding_override": "field_63207c75d5c1b_field_630d15dc01820_field_604fb9aff2bef",
+        "section_width": "field_63207c75d5c1b_field_630d15dc01820_field_604fba7af2bf1",
+        "toc_exclude": "field_63207c75d5c1b_field_630d15dc01820_field_66d80de7822c1",
+        "background_color": "field_63207c75d5c1b_field_630d15dc01820_field_604f9d21affbd",
+        "background_image": "field_63207c75d5c1b_field_630d15dc01820_field_611be7713d1aa",
+        "heading.text": "field_63207c75d5c1b_field_630d15dc01820_field_6104217816977",
+        "heading.level": "field_63207c75d5c1b_field_630d15dc01820_field_6104217f16978",
+        "heading.alignment.desktop": "field_63207c75d5c1b_field_630d15dc01820_field_611278c0063b5",
+        "heading.alignment.mobile": "field_63207c75d5c1b_field_630d15dc01820_field_611278ea063b6",
+        "content": "field_63207c75d5c1b_field_630d16a3135d1",
+        "cards[]": {
+          "url": "field_63207c75d5c1b_field_630cf10177730",
+          "icon": "field_63207c75d5c1b_field_630cf14a77731",
+          "title": "field_63207c75d5c1b_field_630cf16577732",
+          "subtitle": "field_63207c75d5c1b_field_630cf17d77733",
+          "content_excerpt": "field_63207c75d5c1b_field_630cf18d77734",
+          "content": "field_63207c75d5c1b_field_630cf1b277735"
+        }
+      }
+    },
+    "BasicContent": {
+      "layout_key": "layout_6104226d4285a",
+      "fields": {
+        "section_id": "field_6104227ef0b47_field_611e64259a124_field_607dbe7d30c4e",
+        "padding_override": "field_6104227ef0b47_field_611e64259a124_field_604fb9aff2bef",
+        "section_width": "field_6104227ef0b47_field_611e64259a124_field_604fba7af2bf1",
+        "toc_exclude": "field_6104227ef0b47_field_611e64259a124_field_66d80de7822c1",
+        "background_color": "field_6104227ef0b47_field_611e64259a124_field_604f9d21affbd",
+        "background_image": "field_6104227ef0b47_field_611e64259a124_field_611be7713d1aa",
+        "heading.text": "field_6104227ef0b47_field_611e64259a1e0_field_6104217816977",
+        "heading.level": "field_6104227ef0b47_field_611e64259a1e0_field_6104217f16978",
+        "heading.alignment.desktop": "field_6104227ef0b47_field_611e64259a1e0_field_611278c0063b5",
+        "heading.alignment.mobile": "field_6104227ef0b47_field_611e64259a1e0_field_611278ea063b6",
+        "content": "field_6104227ef0b47_field_611e64259a296"
+      }
+    },
+    "TrustBadgeSection": {
+      "layout_key": "layout_63989e476456b",
+      "fields": {
+        "title.heading": "field_63989efd6456c_field_6398a53162cdb",
+        "title.text": "field_63989efd6456c_field_6398a56362cdc",
+        "content": "field_63989efd6456c_field_63989d840cfeb",
+        "badge": "field_63989efd6456c_field_63989d6d985c3",
+        "variant": "field_63989efd6456c_field_6398bbb94794c"
+      }
+    },
+    "RelatedCasinos": {
+      "layout_key": "layout_655c98ba8c8c0",
+      "fields": {
+        "section_id": "field_655c98c98c8c1_field_655c982ffaf4c_field_607dbe7d30c4e",
+        "padding_override": "field_655c98c98c8c1_field_655c982ffaf4c_field_604fb9aff2bef",
+        "section_width": "field_655c98c98c8c1_field_655c982ffaf4c_field_604fba7af2bf1",
+        "toc_exclude": "field_655c98c98c8c1_field_655c982ffaf4c_field_66d80de7822c1",
+        "background_color": "field_655c98c98c8c1_field_655c982ffaf4c_field_604f9d21affbd",
+        "background_image": "field_655c98c98c8c1_field_655c982ffaf4c_field_611be7713d1aa",
+        "heading.text": "field_655c98c98c8c1_field_655c984bfaf4d_field_6104217816977",
+        "heading.level": "field_655c98c98c8c1_field_655c984bfaf4d_field_6104217f16978",
+        "heading.alignment.desktop": "field_655c98c98c8c1_field_655c984bfaf4d_field_611278c0063b5",
+        "heading.alignment.mobile": "field_655c98c98c8c1_field_655c984bfaf4d_field_611278ea063b6",
+        "content_above": "field_655c98c98c8c1_field_655c9888faf4f",
+        "cta_button_text": "field_655c98c98c8c1_field_65f43a04b8223",
+        "cta_button_url": "field_655c98c98c8c1_field_65f43a16b8224"
+      }
+    },
+    "UserReviewsFreeText": {
+      "layout_key": "layout_66adf454b0ef6",
+      "fields": {
+        "section_id": "field_66adf460b0ef9_field_66adf4eaed2fd_field_607dbe7d30c4e",
+        "padding_override": "field_66adf460b0ef9_field_66adf4eaed2fd_field_604fb9aff2bef",
+        "section_width": "field_66adf460b0ef9_field_66adf4eaed2fd_field_604fba7af2bf1",
+        "toc_exclude": "field_66adf460b0ef9_field_66adf4eaed2fd_field_66d80de7822c1",
+        "background_color": "field_66adf460b0ef9_field_66adf4eaed2fd_field_604f9d21affbd",
+        "background_image": "field_66adf460b0ef9_field_66adf4eaed2fd_field_611be7713d1aa"
+      }
+    },
+    "AllReviewsInterlink": {
+      "layout_key": "layout_655a1bd924b45",
+      "fields": {
+        "section_id": "field_655a1c0124b46_field_655a1b03fafc6_field_607dbe7d30c4e",
+        "padding_override": "field_655a1c0124b46_field_655a1b03fafc6_field_604fb9aff2bef",
+        "section_width": "field_655a1c0124b46_field_655a1b03fafc6_field_604fba7af2bf1",
+        "toc_exclude": "field_655a1c0124b46_field_655a1b03fafc6_field_66d80de7822c1",
+        "background_color": "field_655a1c0124b46_field_655a1b03fafc6_field_604f9d21affbd",
+        "background_image": "field_655a1c0124b46_field_655a1b03fafc6_field_611be7713d1aa",
+        "heading.text": "field_655a1c0124b46_field_655a1b24fafc7_field_6104217816977",
+        "heading.level": "field_655a1c0124b46_field_655a1b24fafc7_field_6104217f16978",
+        "heading.alignment.desktop": "field_655a1c0124b46_field_655a1b24fafc7_field_611278c0063b5",
+        "heading.alignment.mobile": "field_655a1c0124b46_field_655a1b24fafc7_field_611278ea063b6"
+      }
+    }
+  }
+}

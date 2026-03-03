@@ -1,0 +1,211 @@
+name: Casino Review Page
+description: Template for casino review pages (e.g. "Sun Vegas Casino Review")
+slug_pattern: "online-casinos/{brand_slug}-review/"
+post_type: post
+
+variables:
+  brand_name:
+    description: "Display name, e.g. 'Sun Vegas Casino'"
+    required: true
+  brand_slug:
+    description: "URL slug, e.g. 'sun-vegas-casino'"
+    required: true
+  target_keywords:
+    description: "Comma-separated SEO keywords to target"
+    required: true
+
+sections:
+  # --- Section 1: Pros and Cons ---
+  - layout: ProsAndCons
+    purpose: Top-level pros and cons overview for the casino
+    llm_context: |
+      Write a brief introductory paragraph for {brand_name}.
+      Then provide 4-6 pros and 3-5 cons based on the casino's features.
+      Be honest and balanced.
+      Target keywords: {target_keywords}
+    fields:
+      heading:
+        text: ""
+        level: h2
+      content: "{{LLM_GENERATE}}"
+      pros: "{{LLM_GENERATE}}"
+      cons: "{{LLM_GENERATE}}"
+
+  # --- Section 2: Media Carousel ---
+  - layout: MediaCarousel
+    purpose: Visual showcase of the casino's interface and features
+    llm_context: |
+      Write a short description (2-3 sentences) introducing the visual
+      tour of {brand_name}. Mention what players can expect to see.
+    fields:
+      heading:
+        text: ""
+        level: h2
+      description_above: "{{LLM_GENERATE}}"
+      description_below: ""
+
+  # --- Section 3: Expandable Cards — Bonuses and Promotions ---
+  - layout: ExpandableCards
+    purpose: Detailed breakdown of the casino's bonuses and promotions
+    llm_context: |
+      Create expandable cards covering the bonuses and promotions at {brand_name}.
+      Each card should cover a specific bonus type (welcome bonus, reload bonus,
+      free spins, loyalty program, etc.).
+      Include details like wagering requirements, minimum deposits, and terms.
+      Target keywords: {target_keywords}
+    fields:
+      heading:
+        text: "{brand_name} Bonuses and Promotions"
+        level: h2
+      content: "{{LLM_GENERATE}}"
+      cards: "{{LLM_GENERATE}}"
+
+  # --- Section 4: Expandable Cards — Game Selection ---
+  - layout: ExpandableCards
+    purpose: Overview of the casino's game library by category
+    llm_context: |
+      Create expandable cards covering the game selection at {brand_name}.
+      Each card should cover a game category (pokies/slots, table games,
+      live dealer, jackpot games, etc.).
+      Mention notable game providers and popular titles.
+      Target keywords: {target_keywords}
+    fields:
+      heading:
+        text: "{brand_name} Game Selection"
+        level: h2
+      content: "{{LLM_GENERATE}}"
+      cards: "{{LLM_GENERATE}}"
+
+  # --- Section 5: Media Carousel — Signing Up ---
+  - layout: MediaCarousel
+    purpose: Step-by-step visual guide to the registration process
+    llm_context: |
+      Write a brief description (2-3 sentences) introducing the sign-up
+      walkthrough at {brand_name}. Mention how easy or straightforward
+      the registration process is.
+    fields:
+      heading:
+        text: "Signing Up at {brand_name}"
+        level: h2
+      description_above: "{{LLM_GENERATE}}"
+      description_below: ""
+
+  # --- Section 6: Expandable Cards — Banking and Payouts ---
+  - layout: ExpandableCards
+    purpose: Payment methods, deposit/withdrawal details and payout speeds
+    llm_context: |
+      Create expandable cards covering banking and payouts at {brand_name}.
+      Each card should cover a topic (deposit methods, withdrawal methods,
+      processing times, limits, fees, etc.).
+      Be specific about supported payment providers and timeframes.
+      Target keywords: {target_keywords}
+    fields:
+      heading:
+        text: "{brand_name} Banking and Payouts"
+        level: h2
+      content: "{{LLM_GENERATE}}"
+      cards: "{{LLM_GENERATE}}"
+
+  # --- Section 7: Basic Content — Mobile Compatibility ---
+  - layout: BasicContent
+    purpose: Mobile experience and app availability
+    llm_context: |
+      Write about mobile compatibility at {brand_name}.
+      Cover: mobile browser experience, dedicated app availability (iOS/Android),
+      game selection on mobile, performance, and any mobile-specific features.
+      Length: 200-300 words.
+      Target keywords: {target_keywords}
+    fields:
+      heading:
+        text: "{brand_name} Mobile Compatibility"
+        level: h2
+      content: "{{LLM_GENERATE}}"
+
+  # --- Section 8: Trust Badge — Is [Brand] Safe? ---
+  - layout: TrustBadgeSection
+    purpose: Safety, licensing, and trustworthiness information
+    llm_context: |
+      Write about the safety and trustworthiness of {brand_name}.
+      Cover: licensing authority, encryption/security measures, responsible
+      gambling tools, and any notable certifications or audits.
+      Length: 150-250 words.
+    fields:
+      title:
+        heading: "Is {brand_name} Safe?"
+        text: "Is {brand_name} Safe?"
+      content: "{{LLM_GENERATE}}"
+      badge: ""
+      variant: ""
+
+  # --- Section 9: Pros and Cons — Customer Support ---
+  - layout: ProsAndCons
+    purpose: Pros and cons of the casino's customer support experience
+    llm_context: |
+      Write a brief overview of {brand_name}'s customer support.
+      Then provide 3-5 pros and 2-4 cons specifically about the support experience.
+      Cover: live chat, email, phone, response times, availability (24/7?),
+      knowledge of staff, language support.
+    fields:
+      heading:
+        text: "{brand_name} Customer Support"
+        level: h2
+      content: "{{LLM_GENERATE}}"
+      pros: "{{LLM_GENERATE}}"
+      cons: "{{LLM_GENERATE}}"
+
+  # --- Section 10: Basic Content — Final Thoughts ---
+  - layout: BasicContent
+    purpose: Concluding summary with overall recommendation
+    llm_context: |
+      Write a concluding summary for the {brand_name} review.
+      Summarise the key strengths and weaknesses.
+      Provide an overall recommendation on who this casino is best suited for.
+      Length: 150-250 words.
+      Target keywords: {target_keywords}
+    fields:
+      heading:
+        text: "Final Thoughts on {brand_name}"
+        level: h2
+      content: "{{LLM_GENERATE}}"
+
+  # --- Section 11: Related Casinos ---
+  - layout: RelatedCasinos
+    purpose: Links to similar casino reviews the reader may enjoy
+    llm_context: |
+      Write a brief intro (1-2 sentences) encouraging the reader to explore
+      similar casinos if {brand_name} isn't the right fit for them.
+    fields:
+      heading:
+        text: "You May Also Like"
+        level: h2
+      content_above: "{{LLM_GENERATE}}"
+      cta_button_text: ""
+      cta_button_url: ""
+
+  # --- Section 12: Basic Content — FAQs ---
+  - layout: BasicContent
+    purpose: Frequently asked questions about the casino
+    llm_context: |
+      Write 5-8 FAQs about {brand_name} in HTML format using
+      <h3> for questions and <p> for answers.
+      Cover: account registration, bonuses, withdrawals, game fairness,
+      mobile play, and customer support.
+      Target keywords: {target_keywords}
+    fields:
+      heading:
+        text: "{brand_name} FAQs"
+        level: h2
+      content: "{{LLM_GENERATE}}"
+
+  # --- Section 13: User Reviews Free Text ---
+  - layout: UserReviewsFreeText
+    purpose: User-generated reviews section (no LLM content needed)
+    fields: {}
+
+  # --- Section 14: All Reviews Interlink ---
+  - layout: AllReviewsInterlink
+    purpose: Link to the full casino reviews index page
+    fields:
+      heading:
+        text: ""
+        level: h2
